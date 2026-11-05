@@ -1,58 +1,59 @@
 -- ============================================================
--- Schema Database: DB USER (rktwutibfgaytygtavfy.supabase.co)
--- Digunakan oleh: Web User (baca & tulis) + Web Admin (baca)
+-- DB USER (rktwutibfgaytygtavfy.supabase.co)
+-- Diakses: Web User (baca & tulis) + Web Admin (baca & tulis)
 -- ============================================================
 
--- 1. Tabel tugas siswa
-CREATE TABLE IF NOT EXISTS public.tasks (
+-- ??  BUAT STORAGE BUCKET MANUAL DI SUPABASE DASHBOARD:
+-- Storage ? New Bucket ? Nama: "submissions" ? Public: ON
+
+-- 1. Tabel Tugas (dibuat guru, dibaca siswa)
+CREATE TABLE IF NOT EXISTS public.assignments (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    subject VARCHAR(100) NOT NULL,
-    detail TEXT NOT NULL,
+    title VARCHAR(200) NOT NULL,
+    description TEXT NOT NULL,
     deadline DATE NOT NULL,
-    is_completed BOOLEAN DEFAULT FALSE,
-    priority VARCHAR(20) DEFAULT 'medium',
-    created_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
-    updated_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+    attachment_url TEXT DEFAULT NULL,     -- file lampiran dari guru (opsional)
+    created_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
--- 2. Index untuk performa query deadline & status
-CREATE INDEX IF NOT EXISTS idx_tasks_deadline ON public.tasks(deadline);
-CREATE INDEX IF NOT EXISTS idx_tasks_is_completed ON public.tasks(is_completed);
+-- 2. Tabel Pengumpulan Tugas Siswa
+CREATE TABLE IF NOT EXISTS public.submissions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    assignment_id UUID NOT NULL REFERENCES public.assignments(id) ON DELETE CASCADE,
+    student_name VARCHAR(150) NOT NULL,
+    student_nim VARCHAR(50) NOT NULL,
+    file_url TEXT NOT NULL,               -- URL file dari Supabase Storage
+    file_name TEXT NOT NULL,              -- Nama file asli
+    notes TEXT DEFAULT NULL,              -- Catatan dari siswa
+    submitted_at TIMESTAMPTZ DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+);
 
--- 3. Trigger auto-update kolom updated_at
-CREATE OR REPLACE FUNCTION update_updated_at_column()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.updated_at = TIMEZONE('utc'::text, NOW());
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+-- 3. Index
+CREATE INDEX IF NOT EXISTS idx_submissions_assignment ON public.submissions(assignment_id);
+CREATE INDEX IF NOT EXISTS idx_assignments_deadline ON public.assignments(deadline);
 
-DROP TRIGGER IF EXISTS trigger_tasks_updated_at ON public.tasks;
-CREATE TRIGGER trigger_tasks_updated_at
-    BEFORE UPDATE ON public.tasks
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+-- 4. RLS
+ALTER TABLE public.assignments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.submissions ENABLE ROW LEVEL SECURITY;
 
--- 4. Row Level Security (RLS)
-ALTER TABLE public.tasks ENABLE ROW LEVEL SECURITY;
+-- Assignments: siapa pun bisa baca, siapa pun bisa tulis (guru via admin)
+DROP POLICY IF EXISTS "Allow all assignments" ON public.assignments;
+CREATE POLICY "Allow all assignments" ON public.assignments USING (true) WITH CHECK (true);
 
--- Web User: baca & tulis milik sendiri
-DROP POLICY IF EXISTS "Allow public read" ON public.tasks;
-CREATE POLICY "Allow public read" ON public.tasks FOR SELECT USING (true);
+-- Submissions: siapa pun bisa baca, siapa pun bisa tulis (siswa via user)
+DROP POLICY IF EXISTS "Allow all submissions" ON public.submissions;
+CREATE POLICY "Allow all submissions" ON public.submissions USING (true) WITH CHECK (true);
 
-DROP POLICY IF EXISTS "Allow public insert" ON public.tasks;
-CREATE POLICY "Allow public insert" ON public.tasks FOR INSERT WITH CHECK (true);
-
-DROP POLICY IF EXISTS "Allow public update" ON public.tasks;
-CREATE POLICY "Allow public update" ON public.tasks FOR UPDATE USING (true);
-
-DROP POLICY IF EXISTS "Allow public delete" ON public.tasks;
-CREATE POLICY "Allow public delete" ON public.tasks FOR DELETE USING (true);
-
--- 5. Seed Data contoh
-INSERT INTO public.tasks (subject, detail, deadline, is_completed, priority)
-VALUES 
-    ('Matematika', 'Kerjakan latihan soal Eksponen hal. 45 no. 1-10 beserta jalannya.', (CURRENT_DATE + INTERVAL '1 day')::DATE, false, 'high'),
-    ('Fisika', 'Buat resume rangkuman Hukum Gravitasi Newton di buku catatan.', (CURRENT_DATE + INTERVAL '3 days')::DATE, false, 'medium'),
-    ('Bahasa Inggris', 'Dialog presentasi kelompok pemesanan hotel (2 orang).', (CURRENT_DATE + INTERVAL '6 days')::DATE, true, 'low')
+-- 5. Seed contoh tugas
+INSERT INTO public.assignments (title, description, deadline) VALUES
+    (
+        'Laporan Praktikum Integrasi Sistem #1',
+        'Buatlah laporan praktikum mengenai konsep integrasi sistem berbasis REST API. Format PDF, minimal 5 halaman, include diagram arsitektur sistem.',
+        (CURRENT_DATE + INTERVAL '7 days')::DATE
+    ),
+    (
+        'Resume Materi Middleware',
+        'Buat resume singkat (1-2 halaman) tentang pengertian, fungsi, dan contoh middleware dalam sistem terintegrasi. Format bebas (PDF/Word).',
+        (CURRENT_DATE + INTERVAL '3 days')::DATE
+    )
 ON CONFLICT DO NOTHING;

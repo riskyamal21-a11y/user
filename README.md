@@ -1,10 +1,10 @@
-# TugasKu - User / Student Application (Next.js & Supabase) 🚀
+# TugasKu - User / Student Application (Next.js & Supabase) ??
 
 Aplikasi pengingat tugas harian untuk siswa dengan desain **Anti-Gravity UI** (Glassmorphism, 3D floating cards, neon blue/white).
 
 ---
 
-## ⚙️ Menjalankan Aplikasi
+## ?? Menjalankan Aplikasi
 
 1. Masuk ke direktori:
    ```bash
@@ -22,7 +22,7 @@ Aplikasi pengingat tugas harian untuk siswa dengan desain **Anti-Gravity UI** (G
 
 ---
 
-## 🗄️ Konfigurasi Supabase Database
+## ??? Konfigurasi Supabase Database
 
 Berkas skema database tersedia di [schema.sql](file:///c:/Users/asus46/OneDrive/Attachments/integrasi%20sistem/user/schema.sql).
 Impor skema ini di SQL Editor dashboard Supabase Anda:
@@ -30,7 +30,7 @@ Impor skema ini di SQL Editor dashboard Supabase Anda:
 
 ---
 
-## 🚀 Push ke GitHub Repository
+## ?? Push ke GitHub Repository
 
 Repository Target: [https://github.com/riskyamal21-a11y/user.git](https://github.com/riskyamal21-a11y/user.git)
 

@@ -1,7 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Satu-satunya database yang diakses web user (DB User/Siswa)
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+// Web User HANYA mengakses DB User.
+// URL dan Key DB Admin tidak ada di sini.
+const supabaseUrl  = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseKey  = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseKey);

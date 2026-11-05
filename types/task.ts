@@ -1,19 +1,20 @@
-export interface Task {
+// Tipe yang sama dengan admin/types/admin.ts (salinan untuk web user)
+export interface Assignment {
   id: string;
-  subject: string;
-  detail: string;
-  deadline: string; // YYYY-MM-DD
-  is_completed: boolean;
-  priority?: 'low' | 'medium' | 'high';
+  title: string;
+  description: string;
+  deadline: string;
+  attachment_url?: string | null;
   created_at?: string;
-  updated_at?: string;
 }
 
-export type UrgencyType = 'urgent' | 'warning' | 'safe' | 'overdue' | 'completed';
-
-export interface TaskStatus {
-  urgency: UrgencyType;
-  badgeText: string;
-  daysDiff: number;
-  isUrgent: boolean;
+export interface Submission {
+  id: string;
+  assignment_id: string;
+  student_name: string;
+  student_nim: string;
+  file_url: string;
+  file_name: string;
+  notes?: string | null;
+  submitted_at?: string;
 }
