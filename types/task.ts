@@ -1,4 +1,4 @@
-// Tipe yang sama dengan admin/types/admin.ts (salinan untuk web user)
+// Tipe Assignment & Submission untuk web user
 export interface Assignment {
   id: string;
   title: string;
@@ -17,4 +17,22 @@ export interface Submission {
   file_name: string;
   notes?: string | null;
   submitted_at?: string;
+}
+
+// Tipe legacy untuk kompatibilitas komponen
+export interface Task {
+  id: string;
+  title: string;
+  description?: string;
+  deadline: string;
+  is_completed: boolean;
+  priority?: 'low' | 'medium' | 'high';
+  created_at?: string;
+}
+
+export interface TaskStatus {
+  urgency: 'overdue' | 'urgent' | 'warning' | 'normal' | 'completed';
+  badgeText: string;
+  daysDiff: number;
+  isUrgent: boolean;
 }
